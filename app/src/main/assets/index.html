@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0f1115">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ویرایشگر HTML + هوش مصنوعی</title>
+<style>
+/* ==========================================================
+   تم‌ها
+   ========================================================== */
+:root{
+  --radius:12px;
+  --fs:13px;
+  --lh:21px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+}
+body[data-theme="dark"]{
+  --bg:#0f1115;--bg2:#161a21;--bg3:#1e232c;--bg4:#252c37;
+  --border:#2a303b;--text:#e6e9ef;--muted:#8b93a3;
+  --accent:#4f8cff;--accent-d:#3a6fd8;--danger:#ff5c5c;--ok:#38d39f;
+  --warn:#f59e0b;--gutter:#4d5768;
+}
+body[data-theme="light"]{
+  --bg:#fafbfc;--bg2:#ffffff;--bg3:#f1f3f6;--bg4:#e4e7ec;
+  --border:#d8dce3;--text:#1a1d23;--muted:#6b7280;
+  --accent:#2563eb;--accent-d:#1d4ed8;--danger:#dc2626;--ok:#059669;
+  --warn:#d97706;--gutter:#a0a6b0;
+}
+body[data-theme="dracula"]{
+  --bg:#282a36;--bg2:#21222c;--bg3:#343746;--bg4:#44475a;
+  --border:#44475a;--text:#f8f8f2;--muted:#8b92b8;
+  --accent:#bd93f9;--accent-d:#9d6de8;--danger:#ff5555;--ok:#50fa7b;
+  --warn:#ffb86c;--gutter:#6272a4;
+}
+body[data-theme="monokai"]{
+  --bg:#272822;--bg2:#1e1f1c;--bg3:#3e3d32;--bg4:#49483e;
+  --border:#49483e;--text:#f8f8f2;--muted:#9a968a;
+  --accent:#a6e22e;--accent-d:#8ac41a;--danger:#f92672;--ok:#a6e22e;
+  --warn:#fd971f;--gutter:#75715e;
+}
+body[data-theme="nord"]{
+  --bg:#2e3440;--bg2:#292e39;--bg3:#3b4252;--bg4:#434c5e;
+  --border:#434c5e;--text:#eceff4;--muted:#8a96ab;
+  --accent:#88c0d0;--accent-d:#6ba8b8;--danger:#bf616a;--ok:#a3be8c;
+  --warn:#ebcb8b;--gutter:#616e88;
+}
+body[data-theme="solarized"]{
+  --bg:#002b36;--bg2:#073642;--bg3:#0d4a5a;--bg4:#155e6e;
+  --border:#0d4a5a;--text:#e6e2d3;--muted:#7f9a9e;
+  --accent:#268bd2;--accent-d:#1c6ca8;--danger:#dc322f;--ok:#859900;
+  --warn:#b58900;--gutter:#586e75;
+}
+body[data-theme="ocean"]{
+  --bg:#0d1b2a;--bg2:#0a1621;--bg3:#1b263b;--bg4:#27364a;
+  --border:#1b263b;--text:#e0e1dd;--muted:#8fa3bb;
+  --accent:#00b4d8;--accent-d:#0096b7;--danger:#ef476f;--ok:#06d6a0;
+  --warn:#ffd166;--gutter:#4a5f7a;
+}
+body[data-theme="rose"]{
+  --bg:#191724;--bg2:#1f1d2e;--bg3:#26233a;--bg4:#2a273f;
+  --border:#26233a;--text:#e0def4;--muted:#a6a2c2;
+  --accent:#c4a7e7;--accent-d:#a888d4;--danger:#eb6f92;--ok:#9ccfd8;
+  --warn:#f6c177;--gutter:#6e6a94;
+}
+body[data-theme="cyberpunk"]{
+  --bg:#0a0a12;--bg2:#12121e;--bg3:#1a1a2e;--bg4:#25254a;
+  --border:#2d2d5a;--text:#f0f0ff;--muted:#7a7aa8;
+  --accent:#ff2e97;--accent-d:#e01e83;--danger:#ff3860;--ok:#00ff9d;
+  --warn:#ffcc00;--gutter:#4a4a80;
+}
+body[data-theme="forest"]{
+  --bg:#0f1710;--bg2:#152019;--bg3:#1c2b22;--bg4:#24382c;
+  --border:#2a4034;--text:#d8e6dc;--muted:#7d9484;
+  --accent:#5fb87a;--accent-d:#4a9c63;--danger:#e05555;--ok:#7fd99a;
+  --warn:#d4a843;--gutter:#4a6b56;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,sans-serif;
+  overflow:hidden;overscroll-behavior:none;
+  font-size:14px;-webkit-font-smoothing:antialiased;
+  transition:background .2s,color .2s;
+}
+button{font-family:inherit;color:inherit;}
+input,textarea{font-family:inherit;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+
+/* ==========================================================
+   نوار بالا
+   ========================================================== */
+.topbar{
+  display:flex;align-items:center;flex:0 0 auto;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:4px 3px;padding-top:calc(4px + env(safe-area-inset-top));
+}
+.icon-btn{
+  width:34px;height:34px;flex:0 0 auto;display:grid;place-items:center;
+  background:transparent;border:0;border-radius:9px;color:var(--text);
+  cursor:pointer;transition:background .15s,color .15s,opacity .15s;
+  position:relative;
+}
+.icon-btn:active{background:var(--bg4);}
+.icon-btn.accent{color:var(--accent);}
+.icon-btn:disabled{opacity:.3;}
+.icon-btn svg{width:18px;height:18px;display:block;}
+.tb-title{
+  flex:1;min-width:0;display:flex;align-items:center;gap:5px;
+  padding:0 4px;overflow:hidden;
+}
+#currentName{
+  font-size:13px;font-weight:600;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:right;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:0 0 auto;opacity:0;transition:opacity .2s;}
+.dot.show{opacity:1;}
+.ai-badge{
+  position:absolute;top:1px;right:1px;min-width:14px;height:14px;padding:0 3px;
+  border-radius:7px;font-size:9px;font-weight:700;line-height:14px;text-align:center;
+  color:#fff;background:var(--danger);border:1.5px solid var(--bg2);
+  box-sizing:content-box;pointer-events:none;
+}
+.ai-badge.warn{background:var(--warn);}
+.ai-badge.hidden{display:none;}
+
+/* ==========================================================
+   نوار درج سریع
+   ========================================================== */
+.tagbar{
+  display:flex;gap:5px;padding:6px 8px;overflow-x:auto;flex:0 0 auto;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.tagbar::-webkit-scrollbar{display:none;}
+.tagbar button{
+  flex:0 0 auto;padding:5px 10px;border-radius:7px;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--muted);font-size:11px;font-family:var(--mono);
+  cursor:pointer;transition:.15s;line-height:1.4;
+}
+.tagbar button:active{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(.95);}
+.tagbar .sep{flex:0 0 auto;width:1px;background:var(--border);margin:2px 3px;}
+.tagbar .ai-btn{color:var(--accent);border-color:rgba(79,140,255,.35);}
+
+/* ==========================================================
+   ویرایشگر
+   ========================================================== */
+.editor-area{
+  flex:1;display:flex;min-height:0;position:relative;
+  direction:ltr;background:var(--bg);
+}
+.gutter{
+  flex:0 0 auto;width:42px;padding:12px 0;
+  overflow:hidden;background:var(--bg2);
+  border-right:1px solid var(--border);
+  font-family:var(--mono);font-size:var(--fs);line-height:var(--lh);
+  color:var(--gutter);text-align:center;user-select:none;white-space:pre;
+}
+.gutter.hidden{display:none;}
+#editor{
+  flex:1;min-width:0;padding:12px;background:transparent;color:var(--text);
+  border:0;outline:none;resize:none;
+  font-family:var(--mono);font-size:var(--fs);line-height:var(--lh);
+  white-space:pre;overflow:auto;direction:ltr;text-align:left;
+  tab-size:2;caret-color:var(--accent);
+  -webkit-text-size-adjust:100%;
+}
+#editor.wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden;}
+
+/* ==========================================================
+   نوار وضعیت
+   ========================================================== */
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  flex:0 0 auto;padding:5px 12px;font-size:10.5px;color:var(--muted);
+  background:var(--bg2);border-top:1px solid var(--border);
+  font-family:var(--mono);direction:ltr;
+  padding-bottom:calc(5px + env(safe-area-inset-bottom));
+}
+.statusbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ==========================================================
+   Backdrop
+   ========================================================== */
+.backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;transition:opacity .22s;z-index:50;
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+}
+.backdrop.show{opacity:1;pointer-events:auto;}
+.backdrop.ai{z-index:74;}
+
+/* ==========================================================
+   دراور فایل‌ها
+   ========================================================== */
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(87vw,350px);
+  background:var(--bg2);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  z-index:60;display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.drawer.open{transform:translateX(0);}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--border);flex:0 0 auto;
+}
+.drawer-head h2{margin:0;font-size:15px;font-weight:700;}
+.drawer-head .count{font-size:11px;color:var(--muted);font-weight:400;margin-inline-start:6px;}
+.file-list{flex:1;overflow-y:auto;padding:6px;-webkit-overflow-scrolling:touch;}
+.file-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;
+  border-radius:10px;cursor:pointer;transition:background .15s;
+  margin-bottom:2px;
+}
+.file-item:active{background:var(--bg3);}
+.file-item.active{background:rgba(79,140,255,.13);box-shadow:inset 0 0 0 1px rgba(79,140,255,.3);}
+.fi-icon{
+  width:32px;height:32px;flex:0 0 auto;border-radius:8px;
+  display:grid;place-items:center;font-size:9px;font-weight:700;
+  background:var(--bg4);color:var(--muted);font-family:var(--mono);
+  letter-spacing:.3px;
+}
+.file-item.active .fi-icon{background:rgba(79,140,255,.2);color:var(--accent);}
+.fi-main{flex:1;min-width:0;}
+.fi-name{
+  font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:ltr;text-align:right;
+}
+.fi-meta{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono);direction:ltr;text-align:right;}
+.fi-more{
+  width:30px;height:30px;flex:0 0 auto;border:0;background:transparent;
+  color:var(--muted);border-radius:8px;font-size:17px;cursor:pointer;
+  display:grid;place-items:center;line-height:1;
+}
+.fi-more:active{background:var(--bg4);color:var(--text);}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:2;}
+.drawer-foot{
+  flex:0 0 auto;padding:10px;border-top:1px solid var(--border);
+  display:flex;gap:8px;
+}
+
+/* ==========================================================
+   دکمه‌ها
+   ========================================================== */
+.btn{
+  padding:10px 16px;border-radius:10px;border:1px solid transparent;
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font-family:inherit;
+}
+.btn:active{transform:scale(.97);}
+.btn.primary{background:var(--accent);color:#fff;}
+.btn.primary:active{background:var(--accent-d);}
+.btn.ghost{background:var(--bg3);color:var(--text);border-color:var(--border);}
+.btn.danger{background:var(--danger);color:#fff;}
+.btn.wide{flex:1;}
+.btn svg{width:16px;height:16px;}
+.btn:disabled{opacity:.4;pointer-events:none;}
+
+/* ==========================================================
+   شیت پایین
+   ========================================================== */
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:70;
+  background:var(--bg2);border-radius:20px 20px 0 0;
+  border-top:1px solid var(--border);
+  transform:translateY(101%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  max-height:82vh;overflow-y:auto;
+  padding-bottom:calc(8px + env(safe-area-inset-bottom));
+}
+.sheet.open{transform:translateY(0);}
+.sheet-handle{
+  width:38px;height:4px;background:var(--bg4);border-radius:4px;
+  margin:9px auto 4px;
+}
+.sheet-title{
+  padding:8px 20px 12px;font-size:12.5px;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--border);margin-bottom:6px;
+}
+.sheet-item{
+  display:flex;align-items:center;gap:14px;width:100%;
+  padding:14px 20px;background:transparent;border:0;color:var(--text);
+  font-size:14.5px;text-align:right;cursor:pointer;transition:background .15s;
+}
+.sheet-item:active{background:var(--bg3);}
+.sheet-item.danger{color:var(--danger);}
+.si-icon{width:22px;display:grid;place-items:center;flex:0 0 auto;opacity:.85;}
+.si-icon svg{width:18px;height:18px;}
+.si-label{flex:1;}
+
+/* ==========================================================
+   مودال
+   ========================================================== */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:90;
+  display:grid;place-items:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+}
+.modal-backdrop.show{opacity:1;pointer-events:auto;}
+.modal{
+  width:100%;max-width:400px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:18px;padding:20px;
+  transform:scale(.94);transition:transform .2s;
+  max-height:85vh;overflow-y:auto;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+.modal-backdrop.show .modal{transform:scale(1);}
+.modal-title{margin:0 0 8px;font-size:16.5px;font-weight:700;}
+.modal-desc{margin:0 0 14px;font-size:12.5px;color:var(--muted);line-height:1.9;}
+.modal-desc:empty{display:none;}
+.modal-input{
+  width:100%;padding:12px 14px;border-radius:11px;
+  background:var(--bg);border:1px solid var(--border);color:var(--text);
+  font-size:14px;outline:none;font-family:var(--mono);
+  transition:border-color .15s;
+}
+.modal-input:focus{border-color:var(--accent);}
+.modal-input + .modal-input{margin-top:9px;}
+.modal-actions{display:flex;gap:9px;margin-top:18px;}
+.modal-actions .btn{flex:1;}
+
+/* Settings rows */
+.set-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 2px;border-bottom:1px solid var(--border);
+}
+.set-row:last-of-type{border-bottom:0;}
+.set-label{font-size:13.5px;}
+.set-sub{font-size:10.5px;color:var(--muted);margin-top:3px;}
+.stepper{display:flex;align-items:center;gap:2px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);padding:2px;}
+.stepper button{
+  width:32px;height:30px;border:0;background:transparent;color:var(--text);
+  font-size:18px;cursor:pointer;border-radius:8px;line-height:1;
+}
+.stepper button:active{background:var(--bg4);}
+.stepper .val{min-width:34px;text-align:center;font-size:13px;font-family:var(--mono);}
+.switch{position:relative;width:44px;height:25px;flex:0 0 auto;cursor:pointer;}
+.switch input{opacity:0;width:0;height:0;position:absolute;}
+.switch .slider{
+  position:absolute;inset:0;background:var(--bg4);border-radius:26px;
+  transition:.2s;border:1px solid var(--border);
+}
+.switch .slider::before{
+  content:"";position:absolute;width:17px;height:17px;border-radius:50%;
+  background:var(--muted);top:3px;right:3px;transition:.2s;
+}
+.switch input:checked + .slider{background:var(--accent);border-color:var(--accent);}
+.switch input:checked + .slider::before{transform:translateX(-19px);background:#fff;}
+
+/* Theme grid */
+.theme-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin:8px 0 4px;
+}
+.theme-swatch{
+  position:relative;aspect-ratio:1;border-radius:10px;cursor:pointer;
+  border:2px solid transparent;overflow:hidden;
+  transition:transform .15s;
+}
+.theme-swatch:active{transform:scale(.94);}
+.theme-swatch.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.2);}
+.theme-swatch .sw-bg{position:absolute;inset:0;display:flex;flex-direction:column;padding:6px;}
+.theme-swatch .sw-bar{height:5px;border-radius:3px;width:60%;margin-bottom:3px;}
+.theme-swatch .sw-bar.short{width:35%;}
+.theme-swatch .sw-name{
+  position:absolute;bottom:2px;right:4px;font-size:8.5px;font-weight:700;
+  color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);
+  text-transform:uppercase;letter-spacing:.3px;
+}
+
+/* ==========================================================
+   پنل هوش مصنوعی
+   ========================================================== */
+.ai-panel{
+  position:fixed;left:0;right:0;bottom:0;
+  height:74vh;max-height:74vh;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  border-radius:20px 20px 0 0;
+  z-index:75;
+  transform:translateY(101%);
+  transition:transform .28s cubic-bezier(.32,.72,0,1);
+  display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -12px 40px rgba(0,0,0,.45);
+}
+.ai-panel.open{transform:translateY(0);}
+.ai-panel-handle{
+  width:40px;height:4px;background:var(--bg4);
+  border-radius:4px;margin:9px auto 4px;flex:0 0 auto;
+}
+.ai-panel-header{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 16px 12px;
+  border-bottom:1px solid var(--border);
+  flex:0 0 auto;
+}
+.ai-panel-title{
+  flex:1;font-size:15px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.ai-panel-title svg{width:20px;height:20px;color:var(--accent);}
+.ai-fix-all{
+  padding:7px 12px;
+  background:var(--accent);
+  color:#fff;border:0;border-radius:8px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  transition:opacity .15s;
+}
+.ai-fix-all:active{background:var(--accent-d);}
+.ai-fix-all:disabled{opacity:.35;pointer-events:none;}
+.ai-fix-all svg{width:14px;height:14px;}
+.ai-summary{
+  display:flex;gap:7px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;flex:0 0 auto;
+}
+.ai-summary::-webkit-scrollbar{display:none;}
+.ai-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 10px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:999px;
+  font-size:11px;color:var(--muted);
+  white-space:nowrap;flex:0 0 auto;
+}
+.ai-chip b{color:var(--text);font-weight:700;font-family:var(--mono);}
+.ai-chip.error b{color:var(--danger);}
+.ai-chip.warn b{color:var(--warn);}
+.ai-chip.ok b{color:var(--ok);}
+
+.ai-list{
+  flex:1;overflow-y:auto;padding:8px 10px 16px;
+  -webkit-overflow-scrolling:touch;
+}
+.ai-empty{
+  padding:50px 20px;text-align:center;color:var(--muted);
+  font-size:13.5px;line-height:1.9;
+}
+.ai-empty .big{font-size:44px;margin-bottom:10px;opacity:.7;}
+.ai-item{
+  display:flex;gap:10px;
+  padding:10px 11px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:8px;
+  border-left:3px solid var(--border);
+  animation: aiFadeIn .25s ease;
+}
+@keyframes aiFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.ai-item.sev-error{border-left-color:var(--danger);}
+.ai-item.sev-warn{border-left-color:var(--warn);}
+.ai-item.sev-hint{border-left-color:var(--accent);}
+.ai-item.sev-info{border-left-color:var(--muted);}
+.ai-item-icon{
+  flex:0 0 auto;width:26px;height:26px;
+  border-radius:7px;display:grid;place-items:center;
+  font-size:12px;font-weight:700;
+  background:var(--bg4);color:var(--muted);
+}
+.ai-item.sev-error .ai-item-icon{background:rgba(255,92,92,.15);color:var(--danger);}
+.ai-item.sev-warn .ai-item-icon{background:rgba(245,158,11,.15);color:var(--warn);}
+.ai-item.sev-hint .ai-item-icon{background:rgba(79,140,255,.15);color:var(--accent);}
+.ai-item-body{flex:1;min-width:0;}
+.ai-item-msg{font-size:13px;line-height:1.6;word-break:break-word;}
+.ai-item-msg code{
+  font-family:var(--mono);background:var(--bg4);
+  padding:1px 5px;border-radius:4px;font-size:11.5px;
+}
+.ai-item-meta{
+  font-size:10.5px;color:var(--muted);
+  margin-top:5px;font-family:var(--mono);
+  direction:ltr;text-align:right;
+}
+.ai-item-actions{
+  display:flex;flex-direction:column;gap:5px;
+  flex:0 0 auto;justify-content:center;
+}
+.ai-mini{
+  padding:5px 9px;border-radius:7px;
+  border:1px solid var(--border);background:var(--bg4);
+  font-size:10.5px;cursor:pointer;
+  white-space:nowrap;font-weight:600;
+  transition:.15s;
+}
+.ai-mini:active{transform:scale(.94);}
+.ai-mini.fix{
+  background:rgba(79,140,255,.15);
+  border-color:rgba(79,140,255,.45);
+  color:var(--accent);
+}
+
+/* ==========================================================
+   پیش‌نمایش
+   ========================================================== */
+.preview{
+  position:fixed;inset:0;z-index:80;background:#fff;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+}
+.preview.open{transform:translateY(0);}
+.preview-head{
+  display:flex;align-items:center;gap:6px;flex:0 0 auto;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:6px 8px;padding-top:calc(6px + env(safe-area-inset-top));
+}
+.preview-head .ptitle{
+  flex:1;font-size:12px;color:var(--muted);font-family:var(--mono);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  direction:ltr;text-align:right;padding-inline:6px;
+}
+.preview iframe{flex:1;width:100%;border:0;background:#fff;}
+
+/* ==========================================================
+   توست
+   ========================================================== */
+.toast{
+  position:fixed;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;
+  transform:translate(-50%,16px);
+  background:var(--bg4);color:var(--text);
+  padding:10px 20px;border-radius:24px;
+  font-size:12.5px;z-index:120;opacity:0;pointer-events:none;
+  transition:opacity .22s,transform .22s;
+  border:1px solid var(--border);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  white-space:nowrap;max-width:90vw;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px;}
+</style>
+</head>
+<body data-theme="dark">
+
+<div id="app">
+
+  <!-- ========== TOP BAR ========== -->
+  <header class="topbar">
+    <button class="icon-btn" id="btnDrawer" aria-label="فایل‌ها">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="tb-title">
+      <span id="currentName">بدون عنوان</span>
+      <span class="dot" id="dirtyDot"></span>
+    </div>
+    <button class="icon-btn" id="btnUndo" aria-label="واگرد">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+    </button>
+    <button class="icon-btn" id="btnRedo" aria-label="ازنو">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg>
+    </button>
+    <button class="icon-btn accent" id="btnAI" aria-label="تحلیل هوشمند">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 13h.01M15 13h.01"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/></svg>
+      <span class="ai-badge hidden" id="aiBadge">0</span>
+    </button>
+    <button class="icon-btn accent" id="btnSave" aria-label="ذخیره">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+    </button>
+    <button class="icon-btn" id="btnRun" aria-label="پیش‌نمایش">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="icon-btn" id="btnMore" aria-label="بیشتر">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+    </button>
+  </header>
+
+  <!-- ========== TAG BAR ========== -->
+  <div class="tagbar" id="tagbar">
+    <button data-tag="div">&lt;div&gt;</button>
+    <button data-tag="p">&lt;p&gt;</button>
+    <button data-tag="h1">&lt;h1&gt;</button>
+    <button data-tag="a">&lt;a&gt;</button>
+    <button data-tag="img">&lt;img&gt;</button>
+    <button data-tag="br">&lt;br&gt;</button>
+    <button data-tag="strong">&lt;b&gt;</button>
+    <button data-tag="ul">&lt;ul&gt;</button>
+    <button data-tag="li">&lt;li&gt;</button>
+    <button data-tag="table">&lt;table&gt;</button>
+    <button data-tag="style">&lt;style&gt;</button>
+    <button data-tag="script">&lt;script&gt;</button>
+    <button data-tag="comment">&lt;!-- --&gt;</button>
+    <button data-tag="nbsp">&amp;nbsp;</button>
+    <span class="sep"></span>
+    <button data-tag="find">🔍 جست‌وجو</button>
+    <button data-tag="format">✨ مرتب‌سازی</button>
+    <button data-tag="ai" class="ai-btn">🤖 تحلیل هوشمند</button>
+  </div>
+
+  <!-- ========== EDITOR ========== -->
+  <div class="editor-area">
+    <div class="gutter" id="gutter"></div>
+    <textarea id="editor" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off" dir="ltr"></textarea>
+  </div>
+
+  <!-- ========== STATUS ========== -->
+  <div class="statusbar">
+    <span id="statusInfo">خط 1 : ستون 1</span>
+    <span id="statusCount">0 کاراکتر</span>
+  </div>
+</div>
+
+<!-- ========== DRAWER ========== -->
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2>فایل‌ها <span class="count" id="fileCount"></span></h2>
+    <button class="icon-btn" id="btnDrawerClose" aria-label="بستن">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="file-list" id="fileList"></div>
+  <div class="drawer-foot">
+    <button class="btn primary wide" id="btnNewFile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      فایل جدید
+    </button>
+    <button class="btn ghost" id="btnImport" aria-label="وارد کردن">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- ========== SHEET ========== -->
+<div class="backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="sheet"></div>
+
+<!-- ========== AI PANEL ========== -->
+<div class="backdrop ai" id="aiBackdrop"></div>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-panel-handle"></div>
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 13h.01M15 13h.01"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1"/></svg>
+      <span>تحلیل هوشمند</span>
+    </div>
+    <button class="ai-fix-all" id="aiFixAll">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      اصلاح همه
+    </button>
+  </div>
+  <div class="ai-summary" id="aiSummary"></div>
+  <div class="ai-list" id="aiList"></div>
+</div>
+
+<!-- ========== MODAL ========== -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<!-- ========== PREVIEW ========== -->
+<div class="preview" id="previewOverlay">
+  <div class="preview-head">
+    <button class="icon-btn" id="btnPreviewClose" aria-label="بستن">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="ptitle" id="previewTitle">پیش‌نمایش</span>
+    <button class="icon-btn" id="btnPreviewReload" aria-label="بازخوانی">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+  </div>
+  <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"></iframe>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   ابزارها
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+function formatSize(b){
+  if(b < 1024) return b + ' B';
+  if(b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+function formatDate(ts){
+  try{
+    const d = new Date(ts), p = n => String(n).padStart(2,'0');
+    return p(d.getFullYear()%100)+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }catch(e){ return ''; }
+}
+function extLabel(name){
+  const m = /\.([a-z0-9]+)$/i.exec(name || '');
+  if(!m) return 'TXT';
+  const e = m[1].toLowerCase();
+  if(e === 'html' || e === 'htm') return 'HTML';
+  if(e === 'css') return 'CSS';
+  if(e === 'js' || e === 'mjs') return 'JS';
+  if(e === 'json') return 'JSON';
+  if(e === 'svg') return 'SVG';
+  if(e === 'xml') return 'XML';
+  if(e === 'md') return 'MD';
+  if(e === 'vue') return 'VUE';
+  return e.slice(0,4).toUpperCase();
+}
+function safeName(n){
+  return String(n || '').replace(/[\\/:*?"<>|]/g,'_').trim() || 'untitled.html';
+}
+function isHtmlLike(name){
+  const m = /\.([a-z0-9]+)$/i.exec(name || '');
+  if(!m) return true;
+  const e = m[1].toLowerCase();
+  return ['html','htm','xhtml','svg','xml','vue','php','asp','aspx','jsp'].includes(e);
+}
+
+/* =========================================================
+   ذخیره‌سازی
+   ========================================================= */
+const DB_NAME = 'html_editor_db';
+const STORE = 'files';
+const LS_KEY = 'html_editor_files_backup';
+let _db = null;
+
+function openDB(){
+  return new Promise((resolve, reject) => {
+    if(_db) return resolve(_db);
+    if(!('indexedDB' in window)) return reject(new Error('no-idb'));
+    let req;
+    try{ req = indexedDB.open(DB_NAME, 1); }catch(e){ return reject(e); }
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, {keyPath:'id'});
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror = e => reject(e.target.error);
+    req.onblocked = e => reject(new Error('blocked'));
+  });
+}
+function lsRead(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }catch(e){ return []; }
+}
+function lsWrite(a){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(a)); }catch(e){}
+}
+async function dbGetAll(){
+  try{
+    const db = await openDB();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const rq = tx.objectStore(STORE).getAll();
+      rq.onsuccess = () => res(rq.result || []);
+      rq.onerror = () => rej(rq.error);
+    });
+  }catch(e){ return lsRead(); }
+}
+async function dbPut(f){
+  try{
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(f);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  }catch(e){
+    const a = lsRead();
+    const i = a.findIndex(x => x.id === f.id);
+    if(i >= 0) a[i] = f; else a.push(f);
+    lsWrite(a);
+  }
+}
+async function dbDelete(id){
+  try{
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(id);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  }catch(e){
+    lsWrite(lsRead().filter(f => f.id !== id));
+  }
+}
+
+/* =========================================================
+   وضعیت و تنظیمات
+   ========================================================= */
+const PREFS_KEY = 'html_editor_prefs';
+const LAST_KEY = 'html_editor_last';
+
+const state = {
+  files: [],
+  currentId: null,
+  dirty: false,
+  wrap: false,
+  lineNumbers: true,
+  fontSize: 13,
+  autoSave: true,
+  theme: 'dark',
+  diagnostics: []
+};
+
+let saveTimer = null;
+let toastTimer = null;
+let analyzeTimer = null;
+
+/* =========================================================
+   عناصر DOM
+   ========================================================= */
+const editor = $('editor');
+const gutter = $('gutter');
+const fileListEl = $('fileList');
+const fileCountEl = $('fileCount');
+const drawer = $('drawer');
+const backdrop = $('backdrop');
+const sheet = $('sheet');
+const sheetBackdrop = $('sheetBackdrop');
+const modalBackdrop = $('modalBackdrop');
+const modalBox = $('modalBox');
+const previewOverlay = $('previewOverlay');
+const previewFrame = $('previewFrame');
+const previewTitle = $('previewTitle');
+const currentNameEl = $('currentName');
+const dirtyDot = $('dirtyDot');
+const statusInfo = $('statusInfo');
+const statusCount = $('statusCount');
+const toastEl = $('toast');
+const aiPanel = $('aiPanel');
+const aiBackdrop = $('aiBackdrop');
+const aiList = $('aiList');
+const aiSummary = $('aiSummary');
+const aiFixAllBtn = $('aiFixAll');
+const aiBadge = $('aiBadge');
+const btnUndo = $('btnUndo');
+const btnRedo = $('btnRedo');
+
+/* =========================================================
+   قالب پیش‌فرض
+   ========================================================= */
+function TEMPLATE(title){
+  return '<!DOCTYPE html>\n<html lang="fa" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>' + (title || 'صفحه جدید') + '</title>\n  <style>\n    * { box-sizing: border-box; }\n    body {\n      font-family: system-ui, -apple-system, sans-serif;\n      margin: 0;\n      padding: 20px;\n      line-height: 1.8;\n      color: #222;\n      background: #fff;\n    }\n    h1 { color: #4f8cff; }\n  </style>\n</head>\n<body>\n\n  <h1>سلام دنیا 👋</h1>\n  <p>این یک فایل HTML است که با ویرایشگر ساخته شده.</p>\n\n</body>\n</html>';
+}
+
+/* =========================================================
+   توست
+   ========================================================= */
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1900);
+}
+
+/* =========================================================
+   تم‌ها
+   ========================================================= */
+const THEMES = [
+  { id:'dark', name:'Dark', bg:'#0f1115', bar:'#4f8cff' },
+  { id:'light', name:'Light', bg:'#fafbfc', bar:'#2563eb' },
+  { id:'dracula', name:'Dracula', bg:'#282a36', bar:'#bd93f9' },
+  { id:'monokai', name:'Monokai', bg:'#272822', bar:'#a6e22e' },
+  { id:'nord', name:'Nord', bg:'#2e3440', bar:'#88c0d0' },
+  { id:'solarized', name:'Solar', bg:'#002b36', bar:'#268bd2' },
+  { id:'ocean', name:'Ocean', bg:'#0d1b2a', bar:'#00b4d8' },
+  { id:'rose', name:'Rosé', bg:'#191724', bar:'#c4a7e7' },
+  { id:'cyberpunk', name:'Cyber', bg:'#0a0a12', bar:'#ff2e97' },
+  { id:'forest', name:'Forest', bg:'#0f1710', bar:'#5fb87a' }
+];
+
+function setTheme(id){
+  state.theme = id;
+  document.body.setAttribute('data-theme', id);
+  savePrefs();
+  try{
+    const c = getComputedStyle(document.body).getPropertyValue('--bg').trim();
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', c);
+  }catch(e){}
+}
+
+/* =========================================================
+   تنظیمات
+   ========================================================= */
+function loadPrefs(){
+  try{
+    const p = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
+    if(typeof p.wrap === 'boolean') state.wrap = p.wrap;
+    if(typeof p.lineNumbers === 'boolean') state.lineNumbers = p.lineNumbers;
+    if(typeof p.fontSize === 'number') state.fontSize = Math.min(24, Math.max(10, p.fontSize));
+    if(typeof p.autoSave === 'boolean') state.autoSave = p.autoSave;
+    if(typeof p.theme === 'string' && THEMES.find(t => t.id === p.theme)) state.theme = p.theme;
+  }catch(e){}
+}
+function savePrefs(){
+  try{
+    localStorage.setItem(PREFS_KEY, JSON.stringify({
+      wrap: state.wrap,
+      lineNumbers: state.lineNumbers,
+      fontSize: state.fontSize,
+      autoSave: state.autoSave,
+      theme: state.theme
+    }));
+  }catch(e){}
+}
+function applyPrefs(){
+  const fs = state.fontSize;
+  document.documentElement.style.setProperty('--fs', fs + 'px');
+  document.documentElement.style.setProperty('--lh', Math.round(fs * 1.62) + 'px');
+  editor.classList.toggle('wrap', state.wrap);
+  editor.setAttribute('wrap', state.wrap ? 'soft' : 'off');
+  gutter.classList.toggle('hidden', !state.lineNumbers || state.wrap);
+  setTheme(state.theme);
+  updateGutter();
+}
+
+/* =========================================================
+   مدیریت فایل‌ها
+   ========================================================= */
+function createFileObject(name, content){
+  const now = Date.now();
+  return {
+    id: uid(),
+    name: safeName(name),
+    content: String(content == null ? '' : content),
+    created: now,
+    updated: now
+  };
+}
+function getCurrent(){
+  return state.files.find(f => f.id === state.currentId) || null;
+}
+function updateTitle(){
+  const f = getCurrent();
+  currentNameEl.textContent = f ? f.name : 'بدون عنوان';
+  dirtyDot.classList.toggle('show', state.dirty);
+  document.title = (state.dirty ? '• ' : '') + (f ? f.name : 'ویرایشگر HTML');
+}
+
+async function openFile(id){
+  await flushSave();
+  const f = state.files.find(x => x.id === id);
+  if(!f) return;
+
+  state.currentId = id;
+  editor.value = f.content;
+  state.dirty = false;
+
+  try{ localStorage.setItem(LAST_KEY, id); }catch(e){}
+
+  editor.scrollTop = 0;
+  gutter.scrollTop = 0;
+
+  // ریست تاریخچه undo
+  undoStack.length = 0;
+  redoStack.length = 0;
+  lastSnapshotAt = 0;
+  updateUndoButtons();
+
+  updateTitle();
+  updateGutter();
+  updateStatus();
+  renderFileList();
+  scheduleAnalysis(200);
+}
+
+async function flushSave(){
+  clearTimeout(saveTimer);
+  const f = getCurrent();
+  if(!f) return;
+  if(f.content === editor.value){ state.dirty = false; return; }
+  f.content = editor.value;
+  f.updated = Date.now();
+  await dbPut(f);
+  state.dirty = false;
+  updateTitle();
+}
+
+async function saveCurrent(showToastMsg){
+  const f = getCurrent();
+  if(!f){ if(showToastMsg) toast('فایلی باز نیست'); return; }
+  clearTimeout(saveTimer);
+  f.content = editor.value;
+  f.updated = Date.now();
+  await dbPut(f);
+  state.dirty = false;
+  updateTitle();
+  if(showToastMsg){
+    const diags = analyzeAll(editor.value);
+    const errs = diags.filter(d => d.severity === 'error').length;
+    if(errs) toast('✓ ذخیره شد — ' + errs + ' خطا شناسایی شد');
+    else toast('✓ ذخیره شد');
+  }
+}
+
+function scheduleAutoSave(){
+  if(!state.autoSave) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const f = getCurrent();
+    if(!f) return;
+    if(f.content === editor.value) return;
+    f.content = editor.value;
+    f.updated = Date.now();
+    await dbPut(f);
+    state.dirty = false;
+    updateTitle();
+  }, 900);
+}
+
+/* =========================================================
+   رندر لیست فایل‌ها
+   ========================================================= */
+function renderFileList(){
+  fileListEl.innerHTML = '';
+  fileCountEl.textContent = '(' + state.files.length + ')';
+
+  if(!state.files.length){
+    const d = document.createElement('div');
+    d.className = 'empty';
+    d.textContent = 'هیچ فایلی وجود ندارد.';
+    fileListEl.appendChild(d);
+    return;
+  }
+
+  const sorted = state.files.slice().sort((a,b) => b.updated - a.updated);
+
+  sorted.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'file-item' + (f.id === state.currentId ? ' active' : '');
+
+    const icon = document.createElement('div');
+    icon.className = 'fi-icon';
+    icon.textContent = extLabel(f.name);
+
+    const main = document.createElement('div');
+    main.className = 'fi-main';
+
+    const nm = document.createElement('div');
+    nm.className = 'fi-name';
+    nm.textContent = f.name;
+
+    const meta = document.createElement('div');
+    meta.className = 'fi-meta';
+    meta.textContent = formatSize(f.content.length) + ' · ' + formatDate(f.updated);
+
+    main.appendChild(nm);
+    main.appendChild(meta);
+
+    const more = document.createElement('button');
+    more.className = 'fi-more';
+    more.textContent = '⋮';
+    more.setAttribute('aria-label', 'گزینه‌ها');
+    more.addEventListener('click', ev => {
+      ev.stopPropagation();
+      openFileSheet(f.id);
+    });
+
+    item.appendChild(icon);
+    item.appendChild(main);
+    item.appendChild(more);
+
+    item.addEventListener('click', async () => {
+      if(f.id === state.currentId){ closeDrawer(); return; }
+      await openFile(f.id);
+      closeDrawer();
+    });
+
+    fileListEl.appendChild(item);
+  });
+}
+
+/* =========================================================
+   دراور / شیت / مودال
+   ========================================================= */
+function openDrawer(){ renderFileList(); drawer.classList.add('open'); backdrop.classList.add('show'); }
+function closeDrawer(){ drawer.classList.remove('open'); backdrop.classList.remove('show'); }
+
+function openSheet(title, items){
+  sheet.innerHTML = '';
+  const h = document.createElement('div');
+  h.className = 'sheet-handle';
+  sheet.appendChild(h);
+  const t = document.createElement('div');
+  t.className = 'sheet-title';
+  t.textContent = title;
+  sheet.appendChild(t);
+
+  items.forEach(it => {
+    const b = document.createElement('button');
+    b.className = 'sheet-item' + (it.danger ? ' danger' : '');
+    const ic = document.createElement('span');
+    ic.className = 'si-icon';
+    ic.textContent = it.icon || '';
+    const lb = document.createElement('span');
+    lb.className = 'si-label';
+    lb.textContent = it.label;
+    b.appendChild(ic);
+    b.appendChild(lb);
+    b.addEventListener('click', () => {
+      closeSheet();
+      setTimeout(() => { try{ it.onClick(); }catch(e){ console.error(e); } }, 170);
+    });
+    sheet.appendChild(b);
+  });
+
+  sheet.classList.add('open');
+  sheetBackdrop.classList.add('show');
+}
+function closeSheet(){ sheet.classList.remove('open'); sheetBackdrop.classList.remove('show'); }
+
+function showModal(renderFn){
+  return new Promise(resolve => {
+    modalBox.innerHTML = '';
+    let done = false;
+    const close = v => {
+      if(done) return;
+      done = true;
+      modalBackdrop.classList.remove('show');
+      setTimeout(() => { if(!modalBackdrop.classList.contains('show')) modalBox.innerHTML = ''; }, 220);
+      resolve(v);
+    };
+    const el = renderFn(close);
+    if(el) modalBox.appendChild(el);
+    modalBackdrop.classList.add('show');
+    modalBackdrop.onclick = e => { if(e.target === modalBackdrop) close(null); };
+  });
+}
+
+function showPrompt(opts){
+  return showModal(close => {
+    const wrap = document.createElement('div');
+    const h = document.createElement('h3');
+    h.className = 'modal-title';
+    h.textContent = opts.title || '';
+    const d = document.createElement('p');
+    d.className = 'modal-desc';
+    d.textContent = opts.desc || '';
+    const input = document.createElement('input');
+    input.className = 'modal-input';
+    input.type = 'text';
+    input.value = opts.value || '';
+    input.placeholder = opts.placeholder || '';
+    input.dir = 'ltr';
+    input.spellcheck = false;
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const cancel = document.createElement('button');
+    cancel.className = 'btn ghost';
+    cancel.textContent = 'انصراف';
+    const ok = document.createElement('button');
+    ok.className = 'btn ' + (opts.danger ? 'danger' : 'primary');
+    ok.textContent = opts.okText || 'تأیید';
+    actions.appendChild(cancel);
+    actions.appendChild(ok);
+    wrap.appendChild(h);
+    if(opts.desc) wrap.appendChild(d);
+    wrap.appendChild(input);
+    wrap.appendChild(actions);
+    cancel.addEventListener('click', () => close(null));
+    ok.addEventListener('click', () => { const v = input.value.trim(); close(v || null); });
+    input.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); ok.click(); } });
+    setTimeout(() => {
+      input.focus();
+      const dot = input.value.lastIndexOf('.');
+      if(dot > 0) input.setSelectionRange(0, dot); else input.select();
+    }, 80);
+    return wrap;
+  });
+}
+
+function showConfirm(opts){
+  return showModal(close => {
+    const wrap = document.createElement('div');
+    const h = document.createElement('h3');
+    h.className = 'modal-title';
+    h.textContent = opts.title || 'تأیید';
+    const d = document.createElement('p');
+    d.className = 'modal-desc';
+    d.textContent = opts.message || '';
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const cancel = document.createElement('button');
+    cancel.className = 'btn ghost';
+    cancel.textContent = 'انصراف';
+    const ok = document.createElement('button');
+    ok.className = 'btn ' + (opts.danger ? 'danger' : 'primary');
+    ok.textContent = opts.okText || 'تأیید';
+    actions.appendChild(cancel);
+    actions.appendChild(ok);
+    wrap.appendChild(h);
+    wrap.appendChild(d);
+    wrap.appendChild(actions);
+    cancel.addEventListener('click', () => close(false));
+    ok.addEventListener('click', () => close(true));
+    return wrap;
+  });
+}
+
+/* =========================================================
+   عملیات فایل
+   ========================================================= */
+async function newFile(){
+  const name = await showPrompt({
+    title:'فایل جدید',
+    desc:'نام فایل را وارد کنید (پسوند .html توصیه می‌شود).',
+    value:'page-' + (state.files.length + 1) + '.html',
+    okText:'ایجاد'
+  });
+  if(!name) return;
+  let fname = safeName(name);
+  if(!/\.[a-z0-9]+$/i.test(fname)) fname += '.html';
+  const base = fname.replace(/\.html?$/i, '');
+  const f = createFileObject(fname, TEMPLATE(base));
+  state.files.push(f);
+  await dbPut(f);
+  await openFile(f.id);
+  toast('✓ فایل ایجاد شد');
+}
+
+async function renameFile(id){
+  const f = state.files.find(x => x.id === id);
+  if(!f) return;
+  const name = await showPrompt({ title:'تغییر نام', value:f.name, okText:'ذخیره' });
+  if(!name) return;
+  const fname = safeName(name);
+  if(fname === f.name) return;
+  f.name = fname;
+  f.updated = Date.now();
+  await dbPut(f);
+  if(id === state.currentId) updateTitle();
+  renderFileList();
+  toast('✓ نام تغییر کرد');
+}
+
+async function deleteFile(id){
+  const f = state.files.find(x => x.id === id);
+  if(!f) return;
+  const ok = await showConfirm({
+    title:'حذف فایل',
+    message:'«' + f.name + '» برای همیشه حذف شود؟ این عمل قابل بازگشت نیست.',
+    okText:'حذف',
+    danger:true
+  });
+  if(!ok) return;
+  if(state.currentId === id) state.currentId = null;
+  state.files = state.files.filter(x => x.id !== id);
+  await dbDelete(id);
+  if(state.currentId === null){
+    if(state.files.length){
+      const next = state.files.slice().sort((a,b) => b.updated - a.updated)[0];
+      await openFile(next.id);
+    }else{
+      editor.value = '';
+      updateTitle();
+      updateGutter();
+      updateStatus();
+    }
+  }
+  renderFileList();
+  toast('🗑 حذف شد');
+}
+
+async function duplicateFile(id){
+  const f = state.files.find(x => x.id === id);
+  if(!f) return;
+  const m = /\.([a-z0-9]+)$/i.exec(f.name);
+  const ext = m ? '.' + m[1] : '.html';
+  const base = m ? f.name.slice(0, -ext.length) : f.name;
+  const nf = createFileObject(base + '-copy' + ext, f.content);
+  state.files.push(nf);
+  await dbPut(nf);
+  renderFileList();
+  toast('✓ کپی ساخته شد');
+}
+
+async function saveAsFile(){
+  const f = getCurrent();
+  if(!f) return;
+  const name = await showPrompt({
+    title:'ذخیره با نام جدید',
+    value:f.name.replace(/(\.[a-z0-9]+)?$/i, '') + '-new.html',
+    okText:'ذخیره'
+  });
+  if(!name) return;
+  let fname = safeName(name);
+  if(!/\.[a-z0-9]+$/i.test(fname)) fname += '.html';
+  const nf = createFileObject(fname, editor.value);
+  state.files.push(nf);
+  await dbPut(nf);
+  await openFile(nf.id);
+  toast('✓ ذخیره شد');
+}
+
+/* =========================================================
+   دانلود / ورود / پشتیبان
+   ========================================================= */
+function downloadBlob(filename, content, mime){
+  try{
+    const blob = new Blob([content], { type: mime || 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+    return true;
+  }catch(e){ toast('خطا در دانلود'); return false; }
+}
+
+function downloadCurrent(){
+  const f = getCurrent();
+  if(!f) return;
+  if(downloadBlob(f.name, editor.value)) toast('⬇ در حال دانلود...');
+}
+
+function readFileText(file){
+  return new Promise((resolve, reject) => {
+    if(typeof file.text === 'function'){
+      file.text().then(resolve).catch(reject);
+      return;
+    }
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result));
+    fr.onerror = () => reject(fr.error);
+    fr.readAsText(file, 'UTF-8');
+  });
+}
+
+function importFiles(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.multiple = true;
+  input.accept = '.html,.htm,.txt,.css,.js,.json,.svg,.xml,.md,text/*';
+  input.addEventListener('change', async () => {
+    const list = Array.from(input.files || []);
+    if(!list.length) return;
+    let count = 0;
+    for(const file of list){
+      try{
+        const text = await readFileText(file);
+        const nf = createFileObject(file.name || ('file-' + Date.now() + '.html'), text);
+        state.files.push(nf);
+        await dbPut(nf);
+        count++;
+      }catch(e){ console.error(e); }
+    }
+    renderFileList();
+    toast(count ? ('✓ ' + count + ' فایل وارد شد') : 'ورود ناموفق بود');
+  });
+  input.click();
+}
+
+function backupAll(){
+  const data = { app:'html-editor', version:2, date:Date.now(), files:state.files };
+  const stamp = new Date().toISOString().slice(0, 10);
+  downloadBlob('html-editor-backup-' + stamp + '.json', JSON.stringify(data, null, 2), 'application/json');
+  toast('⬇ پشتیبان دانلود شد');
+}
+
+function restoreBackup(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.addEventListener('change', async () => {
+    const file = (input.files || [])[0];
+    if(!file) return;
+    try{
+      const text = await readFileText(file);
+      const data = JSON.parse(text);
+      const files = Array.isArray(data) ? data : (data.files || []);
+      if(!files.length){ toast('فایل پشتیبان معتبر نیست'); return; }
+      const ok = await showConfirm({
+        title:'بازیابی پشتیبان',
+        message:files.length + ' فایل بازیابی شود؟ فایل‌های فعلی حفظ خواهند شد.',
+        okText:'بازیابی'
+      });
+      if(!ok) return;
+      for(const f of files){
+        const nf = createFileObject(f.name || 'restored.html', f.content || '');
+        state.files.push(nf);
+        await dbPut(nf);
+      }
+      renderFileList();
+      toast('✓ ' + files.length + ' فایل بازیابی شد');
+    }catch(e){ toast('خطا در خواندن پشتیبان'); }
+  });
+  input.click();
+}
+
+async function shareCurrent(){
+  const f = getCurrent();
+  if(!f) return;
+  if(navigator.share){
+    try{ await navigator.share({ title:f.name, text:editor.value }); return; }
+    catch(e){ if(e && e.name === 'AbortError') return; }
+  }
+  try{ await navigator.clipboard.writeText(editor.value); toast('✓ کپی شد'); }
+  catch(e){ toast('اشتراک‌گذاری پشتیبانی نمی‌شود'); }
+}
+
+async function copyCode(){
+  try{ await navigator.clipboard.writeText(editor.value); toast('✓ کد کپی شد'); }
+  catch(e){
+    editor.select();
+    try{ document.execCommand('copy'); toast('✓ کد کپی شد'); }catch(err){ toast('کپی ناموفق'); }
+  }
+}
+
+/* =========================================================
+   پیش‌نمایش
+   ========================================================= */
+function openPreview(){
+  closeAIPanel();
+  const f = getCurrent();
+  previewTitle.textContent = f ? f.name : 'پیش‌نمایش';
+  previewFrame.srcdoc = editor.value;
+  previewOverlay.classList.add('open');
+}
+function closePreview(){
+  previewOverlay.classList.remove('open');
+  setTimeout(() => { previewFrame.srcdoc = ''; }, 300);
+}
+function reloadPreview(){ previewFrame.srcdoc = editor.value; }
+
+/* =========================================================
+   ویرایشگر: شماره خط و وضعیت
+   ========================================================= */
+function updateGutter(){
+  if(!state.lineNumbers || state.wrap){ gutter.textContent = ''; return; }
+  const v = editor.value;
+  let lines = 1;
+  for(let i = 0; i < v.length; i++) if(v.charCodeAt(i) === 10) lines++;
+  let out = '';
+  for(let i = 1; i <= lines; i++) out += i + '\n';
+  gutter.textContent = out;
+  gutter.scrollTop = editor.scrollTop;
+}
+
+function updateStatus(){
+  const v = editor.value;
+  const pos = editor.selectionStart || 0;
+  let line = 1, last = -1;
+  for(let i = 0; i < pos; i++){
+    if(v.charCodeAt(i) === 10){ line++; last = i; }
+  }
+  const col = pos - last;
+  statusInfo.textContent = 'خط ' + line + ' : ستون ' + col;
+  statusCount.textContent = v.length.toLocaleString('en-US') + ' کاراکتر';
+}
+
+/* =========================================================
+   UNDO / REDO
+   ========================================================= */
+const undoStack = [];
+const redoStack = [];
+let lastSnapshotAt = 0;
+
+function pushUndoSnapshot(force){
+  const now = Date.now();
+  if(!force && now - lastSnapshotAt < 600) return;
+  lastSnapshotAt = now;
+  undoStack.push({ value: editor.value, sel:[editor.selectionStart, editor.selectionEnd] });
+  if(undoStack.length > 120) undoStack.shift();
+  redoStack.length = 0;
+  updateUndoButtons();
+}
+
+function updateUndoButtons(){
+  btnUndo.disabled = undoStack.length === 0;
+  btnRedo.disabled = redoStack.length === 0;
+}
+
+function doUndo(){
+  if(!undoStack.length) return;
+  redoStack.push({ value: editor.value, sel:[editor.selectionStart, editor.selectionEnd] });
+  const snap = undoStack.pop();
+  editor.value = snap.value;
+  editor.setSelectionRange(snap.sel[0], snap.sel[1]);
+  handleInput(true);
+}
+
+function doRedo(){
+  if(!redoStack.length) return;
+  undoStack.push({ value: editor.value, sel:[editor.selectionStart, editor.selectionEnd] });
+  const snap = redoStack.pop();
+  editor.value = snap.value;
+  editor.setSelectionRange(snap.sel[0], snap.sel[1]);
+  handleInput(true);
+}
+
+/* =========================================================
+   هندلر ورودی
+   ========================================================= */
+function handleInput(skipSnapshot){
+  state.dirty = true;
+  updateTitle();
+  updateGutter();
+  updateStatus();
+  scheduleAutoSave();
+  scheduleAnalysis();
+  if(!skipSnapshot) updateUndoButtons();
+}
+
+/* =========================================================
+   درج کد و ویرایش‌های سریع
+   ========================================================= */
+function insertSnippet(before, after, placeholder){
+  pushUndoSnapshot(true);
+  const s = editor.selectionStart;
+  const e = editor.selectionEnd;
+  const sel = editor.value.slice(s, e);
+  const inner = sel || placeholder || '';
+  const text = before + inner + after;
+
+  editor.setRangeText(text, s, e, 'end');
+  if(!sel && placeholder){
+    editor.setSelectionRange(s + before.length, s + before.length + placeholder.length);
+  }
+  handleInput(true);
+  editor.focus();
+}
+
+function insertPlain(text){
+  pushUndoSnapshot(true);
+  const s = editor.selectionStart;
+  const e = editor.selectionEnd;
+  editor.setRangeText(text, s, e, 'end');
+  handleInput(true);
+  editor.focus();
+}
+
+function jumpToLine(line, col){
+  const lines = editor.value.split('\n');
+  let pos = 0;
+  for(let i = 0; i < line - 1 && i < lines.length; i++) pos += lines[i].length + 1;
+  pos += Math.min(Math.max(0, (col || 1) - 1), (lines[line - 1] || '').length);
+  editor.focus();
+  editor.setSelectionRange(pos, pos);
+  const lh = state.fontSize * 1.62;
+  editor.scrollTop = Math.max(0, (line - 4) * lh);
+}
+
+/* =========================================================
+   جست‌وجو و جایگزینی
+   ========================================================= */
+function openFindReplace(){
+  showModal(close => {
+    const wrap = document.createElement('div');
+    const h = document.createElement('h3');
+    h.className = 'modal-title';
+    h.textContent = 'جست‌وجو و جایگزینی';
+
+    const fi = document.createElement('input');
+    fi.className = 'modal-input';
+    fi.placeholder = 'متن مورد جست‌وجو';
+    fi.dir = 'ltr';
+
+    const ri = document.createElement('input');
+    ri.className = 'modal-input';
+    ri.placeholder = 'متن جایگزین';
+    ri.dir = 'ltr';
+
+    const info = document.createElement('p');
+    info.className = 'modal-desc';
+    info.style.marginTop = '10px';
+
+    const r1 = document.createElement('div');
+    r1.className = 'modal-actions';
+    const bn = document.createElement('button');
+    bn.className = 'btn ghost';
+    bn.textContent = 'بعدی';
+    const ba = document.createElement('button');
+    ba.className = 'btn primary';
+    ba.textContent = 'جایگزینی همه';
+    r1.appendChild(bn); r1.appendChild(ba);
+
+    const r2 = document.createElement('div');
+    r2.className = 'modal-actions';
+    const bc = document.createElement('button');
+    bc.className = 'btn ghost wide';
+    bc.textContent = 'بستن';
+    r2.appendChild(bc);
+
+    wrap.appendChild(h);
+    wrap.appendChild(fi);
+    wrap.appendChild(ri);
+    wrap.appendChild(info);
+    wrap.appendChild(r1);
+    wrap.appendChild(r2);
+
+    function findNext(){
+      const q = fi.value;
+      if(!q) return;
+      const v = editor.value;
+      let from = editor.selectionEnd || 0;
+      let idx = v.indexOf(q, from);
+      if(idx === -1) idx = v.indexOf(q, 0);
+      if(idx === -1){ info.textContent = 'یافت نشد'; return; }
+      editor.focus();
+      editor.setSelectionRange(idx, idx + q.length);
+      const before = v.slice(0, idx);
+      let ln = 1;
+      for(let i = 0; i < before.length; i++) if(before.charCodeAt(i) === 10) ln++;
+      editor.scrollTop = Math.max(0, (ln - 4) * state.fontSize * 1.62);
+      info.textContent = 'یافت شد در خط ' + ln;
+    }
+    function replaceAll(){
+      const q = fi.value;
+      if(!q) return;
+      const r = ri.value;
+      const parts = editor.value.split(q);
+      const count = parts.length - 1;
+      if(count <= 0){ info.textContent = 'یافت نشد'; return; }
+      pushUndoSnapshot(true);
+      editor.value = parts.join(r);
+      handleInput(true);
+      info.textContent = count + ' مورد جایگزین شد';
+    }
+    bn.addEventListener('click', findNext);
+    ba.addEventListener('click', replaceAll);
+    bc.addEventListener('click', () => close(null));
+    fi.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); findNext(); } });
+    setTimeout(() => fi.focus(), 100);
+    return wrap;
+  });
+}
+
+/* =========================================================
+   مرتب‌سازی سبک HTML
+   ========================================================= */
+function formatCode(){
+  pushUndoSnapshot(true);
+  const src = editor.value;
+  const VOID = /^<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b/i;
+  const tokens = src.replace(/>\s*</g, '>\n<').split('\n');
+  let indent = 0;
+  const out = [];
+
+  for(const raw of tokens){
+    const line = raw.trim();
+    if(!line) continue;
+    const isEnd = /^<\//.test(line);
+    const isSelfClose = /\/>$/.test(line) || VOID.test(line);
+    const isDecl = /^<!/.test(line);
+    const isOpen = /^<[a-zA-Z]/.test(line) && !isEnd && !isSelfClose && !isDecl;
+    const isInline = /^<[a-zA-Z][^>]*>.*<\/[a-zA-Z]+>$/.test(line);
+
+    if(isEnd) indent = Math.max(0, indent - 1);
+    out.push('  '.repeat(Math.max(0, indent)) + line);
+    if(isOpen && !isInline) indent++;
+  }
+
+  editor.value = out.join('\n');
+  handleInput(true);
+  toast('✨ مرتب شد');
+}
+
+/* =========================================================
+   🤖 موتور تحلیل هوشمند
+   ========================================================= */
+
+const VOID_TAGS = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+
+function buildLineMap(code){
+  const offsets = [0];
+  for(let i = 0; i < code.length; i++) if(code[i] === '\n') offsets.push(i + 1);
+  return offsets;
+}
+function offsetToPos(offsets, index){
+  let lo = 0, hi = offsets.length - 1;
+  while(lo < hi){
+    const mid = (lo + hi + 1) >> 1;
+    if(offsets[mid] <= index) lo = mid; else hi = mid - 1;
+  }
+  return { line: lo + 1, col: index - offsets[lo] + 1 };
+}
+
+/* --- تحلیل HTML --- */
+function analyzeHTML(code, lineMap, isHtml){
+  const diags = [];
+  const stack = [];
+  const idMap = {};
+  const tagRe = /<\/?([a-zA-Z][a-zA-Z0-9-]*)\b[^>]*?(\/?)>/g;
+  let m;
+
+  while((m = tagRe.exec(code)) !== null){
+    const full = m[0];
+    const tagName = m[1].toLowerCase();
+    const isClosing = full.startsWith('</');
+    const isSelfClose = m[2] === '/' || VOID_TAGS.has(tagName);
+    const pos = offsetToPos(lineMap, m.index);
+
+    if(isClosing){
+      if(!stack.length){
+        diags.push({ severity:'error', message:'تگ بسته </' + tagName + '> بدون تگ باز متناظر', line:pos.line, col:pos.col, fixable:false });
+      }else{
+        const top = stack[stack.length - 1];
+        if(top.name === tagName){
+          stack.pop();
+        }else{
+          let found = -1;
+          for(let i = stack.length - 1; i >= 0; i--){
+            if(stack[i].name === tagName){ found = i; break; }
+          }
+          if(found === -1){
+            diags.push({ severity:'error', message:'تگ بسته </' + tagName + '> بدون تگ باز متناظر', line:pos.line, col:pos.col, fixable:false });
+          }else{
+            for(let i = stack.length - 1; i > found; i--){
+              const u = stack[i];
+              diags.push({ severity:'error', message:'تگ <' + u.name + '> بسته نشده است', line:u.line, col:u.col, fixable:true, fixType:'closeTag', tagName:u.name });
+            }
+            stack.length = found;
+          }
+        }
+      }
+    }else if(!isSelfClose){
+      stack.push({ name:tagName, line:pos.line, col:pos.col });
+    }
+
+    // بررسی تصاویر بدون alt (فقط تعداد را می‌شماریم)
+    if(tagName === 'img' && !/\balt\s*=/i.test(full)){
+      diags.push({ severity:'warn', message:'تگ <img> بدون ویژگی alt', line:pos.line, col:pos.col, fixable:true, fixType:'imgAlt' });
+    }
+    // لینک بدون href
+    if(tagName === 'a' && !isClosing && !/\bhref\s*=/i.test(full)){
+      diags.push({ severity:'hint', message:'تگ <a> بدون ویژگی href', line:pos.line, col:pos.col, fixable:false });
+    }
+    // style درون‌خطی
+    if(!isClosing && /\bstyle\s*=\s*["']/i.test(full)){
+      diags.push({ severity:'hint', message:'استایل درون‌خطی (style attribute) توصیه نمی‌شود', line:pos.line, col:pos.col, fixable:false });
+    }
+    // تگ‌های منسوخ
+    if(!isClosing && ['font','center','marquee','blink','big','tt','strike'].includes(tagName)){
+      diags.push({ severity:'hint', message:'تگ منسوخ <' + tagName + '>', line:pos.line, col:pos.col, fixable:false });
+    }
+  }
+
+  // تگ‌های باز باقی‌مانده
+  for(const t of stack){
+    diags.push({ severity:'error', message:'تگ <' + t.name + '> بسته نشده است', line:t.line, col:t.col, fixable:true, fixType:'closeTag', tagName:t.name });
+  }
+
+  // شناسه‌های تکراری
+  const idRe = /\bid\s*=\s*["']([^"']+)["']/g;
+  let idm;
+  while((idm = idRe.exec(code)) !== null){
+    const id = idm[1];
+    if(idMap[id]){
+      const p = offsetToPos(lineMap, idm.index);
+      diags.push({ severity:'warn', message:'شناسه تکراری <code>id="' + id + '"</code>', line:p.line, col:p.col, fixable:false });
+    }else idMap[id] = true;
+  }
+
+  // بررسی‌های ساختاری (فقط برای فایل HTML)
+  if(isHtml){
+    if(!/<!DOCTYPE\s+html/i.test(code)){
+      diags.push({ severity:'warn', message:'اعلام <code>&lt;!DOCTYPE html&gt;</code> در ابتدای سند وجود ندارد', line:1, col:1, fixable:true, fixType:'doctype' });
+    }
+    if(!/<meta[^>]*charset/i.test(code)){
+      diags.push({ severity:'warn', message:'تگ <code>&lt;meta charset="UTF-8"&gt;</code> وجود ندارد', line:1, col:1, fixable:true, fixType:'charset' });
+    }
+    if(!/<meta[^>]*name\s*=\s*["']viewport["']/i.test(code)){
+      diags.push({ severity:'warn', message:'متاتگ <code>viewport</code> برای موبایل تنظیم نشده', line:1, col:1, fixable:true, fixType:'viewport' });
+    }
+    if(!/<html[^>]*\blang\s*=/i.test(code)){
+      diags.push({ severity:'hint', message:'ویژگی <code>lang</code> در تگ <code>&lt;html&gt;</code> تنظیم نشده', line:1, col:1, fixable:true, fixType:'lang' });
+    }
+  }
+
+  return diags;
+}
+
+/* --- تحلیل CSS --- */
+function analyzeCSS(css, baseLine){
+  const diags = [];
+  let depth = 0;
+  for(let i = 0; i < css.length; i++){
+    const c = css[i];
+    if(c === '{') depth++;
+    else if(c === '}'){
+      depth--;
+      if(depth < 0){
+        diags.push({ severity:'error', message:'آکولاد بسته <code>}</code> اضافی در CSS', line:baseLine, col:1, fixable:false });
+        depth = 0;
+      }
+    }
+  }
+  if(depth > 0){
+    diags.push({ severity:'error', message:depth + ' آکولاد باز <code>{</code> در CSS بسته نشده است', line:baseLine, col:1, fixable:false });
+  }
+
+  // بررسی نقطه‌ویرگول فراموش‌شده (به‌صورت محافظه‌کارانه)
+  const lines = css.split('\n');
+  let inBlock = 0;
+  let inComment = false;
+  lines.forEach((ln, idx) => {
+    const trimmed = ln.trim();
+    // رد کردن کامنت‌ها
+    if(inComment){ if(trimmed.includes('*/')) inComment = false; return; }
+    if(trimmed.startsWith('/*')){ if(!trimmed.includes('*/')) inComment = true; return; }
+    if(!trimmed) return;
+
+    const opens = (trimmed.match(/{/g) || []).length;
+    const closes = (trimmed.match(/}/g) || []).length;
+
+    const insideBlock = inBlock > 0 || opens > closes;
+    const savedInBlock = inBlock;
+
+    if(insideBlock && savedInBlock > 0 || (opens > 0 && trimmed.endsWith('{'))){
+      // skip selector lines
+    }
+
+    if(savedInBlock > 0 && !trimmed.endsWith('{') && !trimmed.endsWith('}') && !trimmed.endsWith(';') && !trimmed.endsWith(',') && /:\s*\S/.test(trimmed) && !trimmed.startsWith('@')){
+      diags.push({
+        severity:'warn',
+        message:'احتمالاً <code>;</code> فراموش شده: <code>' + trimmed.slice(0, 45).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</code>',
+        line:baseLine + idx,
+        col:1,
+        fixable:true,
+        fixType:'cssSemicolon',
+        lineIdx: idx
+      });
+    }
+
+    inBlock += opens - closes;
+    if(inBlock < 0) inBlock = 0;
+  });
+
+  return diags;
+}
+
+/* --- تحلیل JS --- */
+function analyzeJS(js, baseLine){
+  const diags = [];
+  let parens = 0, braces = 0, brackets = 0;
+  let inStr = null, strEsc = false;
+  let inLine = false, inBlock = false;
+  let inTemplate = 0, tplEsc = false;
+
+  for(let i = 0; i < js.length; i++){
+    const c = js[i], n = js[i + 1];
+
+    if(inLine){ if(c === '\n') inLine = false; continue; }
+    if(inBlock){ if(c === '*' && n === '/'){ inBlock = false; i++; } continue; }
+    if(inStr){
+      if(strEsc){ strEsc = false; continue; }
+      if(c === '\\'){ strEsc = true; continue; }
+      if(c === inStr) inStr = null;
+      continue;
+    }
+    if(inTemplate > 0){
+      if(tplEsc){ tplEsc = false; continue; }
+      if(c === '\\'){ tplEsc = true; continue; }
+      if(c === '`'){ inTemplate--; continue; }
+      continue;
+    }
+
+    if(c === '/' && n === '/'){ inLine = true; i++; continue; }
+    if(c === '/' && n === '*'){ inBlock = true; i++; continue; }
+    if(c === '"' || c === "'"){ inStr = c; continue; }
+    if(c === '`'){ inTemplate++; continue; }
+
+    if(c === '(') parens++;
+    else if(c === ')') parens--;
+    else if(c === '{') braces++;
+    else if(c === '}') braces--;
+    else if(c === '[') brackets++;
+    else if(c === ']') brackets--;
+  }
+
+  if(parens !== 0){
+    diags.push({ severity:'error', message:'پرانتزهای نامتوازن در JS (' + Math.abs(parens) + ' ' + (parens > 0 ? 'باز' : 'بسته') + ' اضافی)', line:baseLine, col:1, fixable:false });
+  }
+  if(braces !== 0){
+    diags.push({ severity:'error', message:'آکولادهای نامتوازن در JS (' + Math.abs(braces) + ' ' + (braces > 0 ? 'باز' : 'بسته') + ' اضافی)', line:baseLine, col:1, fixable:false });
+  }
+  if(brackets !== 0){
+    diags.push({ severity:'error', message:'براکت‌های نامتوازن در JS (' + Math.abs(brackets) + ' ' + (brackets > 0 ? 'باز' : 'بسته') + ' اضافی)', line:baseLine, col:1, fixable:false });
+  }
+
+  // بررسی نگارش با Function
+  if(!/\b(import|export)\s/.test(js.slice(0, 400))){
+    try{
+      new Function(js);
+    }catch(e){
+      const msg = String(e && e.message || '').slice(0, 90);
+      diags.push({ severity:'error', message:'خطای نگارش JS: <code>' + msg.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</code>', line:baseLine, col:1, fixable:false });
+    }
+  }
+
+  return diags;
+}
+
+/* --- تحلیل جامع --- */
+function analyzeAll(code){
+  const diags = [];
+  const lineMap = buildLineMap(code);
+  const f = getCurrent();
+  const isHtml = f ? isHtmlLike(f.name) : true;
+
+  diags.push(...analyzeHTML(code, lineMap, isHtml));
+
+  // CSS داخل <style>
+  const styleRe = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+  let m;
+  while((m = styleRe.exec(code)) !== null){
+    const openEnd = m.index + m[0].indexOf('>') + 1;
+    const pos = offsetToPos(lineMap, openEnd);
+    diags.push(...analyzeCSS(m[1], pos.line));
+  }
+
+  // JS داخل <script> بدون src
+  const scriptRe = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+  while((m = scriptRe.exec(code)) !== null){
+    if(/\bsrc\s*=/i.test(m[1])) continue;
+    const openEnd = m.index + m[0].indexOf('>') + 1;
+    const pos = offsetToPos(lineMap, openEnd);
+    diags.push(...analyzeJS(m[2], pos.line));
+  }
+
+  // ترتیب: خط سپس شدت
+  const sevOrder = { error:0, warn:1, hint:2, info:3 };
+  diags.sort((a, b) => (a.line - b.line) || (sevOrder[a.severity] - sevOrder[b.severity]));
+
+  return diags;
+}
+
+/* =========================================================
+   اصلاح خودکار
+   ========================================================= */
+function applyFix(code, diag){
+  try{
+    switch(diag.fixType){
+      case 'doctype': {
+        if(/^\s*<!DOCTYPE/i.test(code)) return code;
+        return '<!DOCTYPE html>\n' + code;
+      }
+      case 'charset': {
+        const tag = '  <meta charset="UTF-8">';
+        if(/<head[^>]*>/i.test(code)){
+          return code.replace(/(<head[^>]*>)/i, '$1\n' + tag);
+        }
+        if(/<html[^>]*>/i.test(code)){
+          return code.replace(/(<html[^>]*>)/i, '$1\n<head>\n' + tag + '\n</head>');
+        }
+        return '<head>\n' + tag + '\n</head>\n' + code;
+      }
+      case 'viewport': {
+        const tag = '  <meta name="viewport" content="width=device-width, initial-scale=1.0">';
+        if(/<head[^>]*>/i.test(code)){
+          return code.replace(/(<head[^>]*>)/i, '$1\n' + tag);
+        }
+        return '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' + code;
+      }
+      case 'lang': {
+        if(/<html[^>]*>/i.test(code)){
+          return code.replace(/<html([^>]*)>/i, (mm, attrs) => {
+            if(/\blang\s*=/i.test(attrs)) return mm;
+            return '<html lang="fa" dir="rtl"' + attrs + '>';
+          });
+        }
+        return '<html lang="fa" dir="rtl">\n' + code;
+      }
+      case 'closeTag': {
+        const closeTag = '</' + diag.tagName + '>';
+        if(/<\/body>/i.test(code)){
+          return code.replace(/(<\/body>)/i, closeTag + '\n$1');
+        }
+        if(/<\/html>/i.test(code)){
+          return code.replace(/(<\/html>)/i, closeTag + '\n$1');
+        }
+        return code + '\n' + closeTag;
+      }
+      case 'imgAlt': {
+        // اولین img بدون alt را اصلاح کن
+        let done = false;
+        return code.replace(/<img\b([^>]*?)(\/?)>/i, (mm, attrs, slash) => {
+          if(done || /\balt\s*=/i.test(attrs)) return mm;
+          done = true;
+          return '<img' + attrs + ' alt=""' + slash + '>';
+        });
+      }
+      case 'cssSemicolon': {
+        // پیدا کردن خط مورد نظر و افزودن ; در انتهای آن
+        const lines = code.split('\n');
+        let cssLineCount = 0;
+        // باید خط داخل بلوک CSS را پیدا کنیم — از lineIdx نسبی استفاده می‌کنیم
+        // راه ساده: کل خطوط را می‌گردیم و اولین خطی که مطابق باشد را اصلاح می‌کنیم
+        // برای سادگی، خط را با line number پیدا می‌کنیم
+        const targetLine = diag.line;
+        if(targetLine >= 1 && targetLine <= lines.length){
+          const ln = lines[targetLine - 1];
+          if(ln.trim() && !ln.trim().endsWith(';') && !ln.trim().endsWith('{') && !ln.trim().endsWith('}')){
+            lines[targetLine - 1] = ln.replace(/(\S)\s*$/, '$1;');
+            return lines.join('\n');
+          }
+        }
+        return code;
+      }
+    }
+  }catch(e){ console.error('fix error', e); }
+  return code;
+}
+
+/* =========================================================
+   پنل هوش مصنوعی
+   ========================================================= */
+function updateAIBadge(diags){
+  const errs = diags.filter(d => d.severity === 'error').length;
+  const warns = diags.filter(d => d.severity === 'warn').length;
+  if(errs){
+    aiBadge.textContent = errs > 99 ? '99+' : String(errs);
+    aiBadge.className = 'ai-badge';
+  }else if(warns){
+    aiBadge.textContent = warns > 99 ? '99+' : String(warns);
+    aiBadge.className = 'ai-badge warn';
+  }else{
+    aiBadge.className = 'ai-badge hidden';
+  }
+}
+
+function scheduleAnalysis(delay){
+  clearTimeout(analyzeTimer);
+  analyzeTimer = setTimeout(() => {
+    if(editor.value.length > 250000) return; // فایل خیلی بزرگ
+    const diags = analyzeAll(editor.value);
+    updateAIBadge(diags);
+    if(aiPanel.classList.contains('open')) renderAIPanel(diags);
+  }, typeof delay === 'number' ? delay : 1500);
+}
+
+function renderAIPanel(diags){
+  state.diagnostics = diags;
+  const errs = diags.filter(d => d.severity === 'error').length;
+  const warns = diags.filter(d => d.severity === 'warn').length;
+  const hints = diags.filter(d => d.severity === 'hint').length;
+  const fixable = diags.filter(d => d.fixable).length;
+
+  // خلاصه
+  aiSummary.innerHTML = '';
+  const chips = [
+    { cls:'error', label:'خطا', n:errs },
+    { cls:'warn', label:'هشدار', n:warns },
+    { cls:'', label:'راهنما', n:hints }
+  ];
+  chips.forEach(c => {
+    const ch = document.createElement('span');
+    ch.className = 'ai-chip ' + c.cls;
+    ch.innerHTML = c.label + ' <b>' + c.n + '</b>';
+    aiSummary.appendChild(ch);
+  });
+  if(!diags.length){
+    const ok = document.createElement('span');
+    ok.className = 'ai-chip ok';
+    ok.innerHTML = '✓ بدون مشکل <b>' + 0 + '</b>';
+    aiSummary.appendChild(ok);
+  }
+
+  // دکمه اصلاح همه
+  aiFixAllBtn.disabled = fixable === 0;
+
+  // لیست
+  aiList.innerHTML = '';
+
+  if(!diags.length){
+    const e = document.createElement('div');
+    e.className = 'ai-empty';
+    e.innerHTML = '<div class="big">✅</div><div>عالی! هیچ خطا یا هشداری پیدا نشد.</div>';
+    aiList.appendChild(e);
+    return;
+  }
+
+  const ICONS = { error:'✕', warn:'⚠', hint:'💡', info:'ℹ' };
+  const SEV_LABEL = { error:'خطا', warn:'هشدار', hint:'راهنما', info:'اطلاع' };
+
+  diags.forEach((d, idx) => {
+    const item = document.createElement('div');
+    item.className = 'ai-item sev-' + d.severity;
+
+    const ic = document.createElement('div');
+    ic.className = 'ai-item-icon';
+    ic.textContent = ICONS[d.severity] || '•';
+
+    const body = document.createElement('div');
+    body.className = 'ai-item-body';
+
+    const msg = document.createElement('div');
+    msg.className = 'ai-item-msg';
+    msg.innerHTML = d.message;
+
+    const meta = document.createElement('div');
+    meta.className = 'ai-item-meta';
+    meta.textContent = SEV_LABEL[d.severity] + ' · خط ' + d.line + ' : ستون ' + (d.col || 1);
+
+    body.appendChild(msg);
+    body.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'ai-item-actions';
+
+    if(d.fixable){
+      const fixBtn = document.createElement('button');
+      fixBtn.className = 'ai-mini fix';
+      fixBtn.textContent = 'اصلاح';
+      fixBtn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        const before = editor.value;
+        pushUndoSnapshot(true);
+        const after = applyFix(editor.value, d);
+        if(after === before){
+          toast('اصلاح ممکن نشد');
+          return;
+        }
+        editor.value = after;
+        handleInput(true);
+        const fresh = analyzeAll(editor.value);
+        updateAIBadge(fresh);
+        renderAIPanel(fresh);
+        toast('✓ اصلاح شد');
+      });
+      actions.appendChild(fixBtn);
+    }
+
+    const jumpBtn = document.createElement('button');
+    jumpBtn.className = 'ai-mini';
+    jumpBtn.textContent = 'برو';
+    jumpBtn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      closeAIPanel();
+      setTimeout(() => jumpToLine(d.line, d.col), 220);
+    });
+    actions.appendChild(jumpBtn);
+
+    item.appendChild(ic);
+    item.appendChild(body);
+    item.appendChild(actions);
+
+    item.addEventListener('click', () => {
+      closeAIPanel();
+      setTimeout(() => jumpToLine(d.line, d.col), 220);
+    });
+
+    aiList.appendChild(item);
+  });
+}
+
+function openAIPanel(){
+  const diags = analyzeAll(editor.value);
+  updateAIBadge(diags);
+  renderAIPanel(diags);
+  aiPanel.classList.add('open');
+  aiBackdrop.classList.add('show');
+}
+
+function closeAIPanel(){
+  aiPanel.classList.remove('open');
+  aiBackdrop.classList.remove('show');
+}
+
+function aiFixAll(){
+  const original = editor.value;
+  pushUndoSnapshot(true);
+  let totalFixed = 0;
+  let iterations = 0;
+
+  while(iterations++ < 40){
+    const diags = analyzeAll(editor.value).filter(d => d.fixable);
+    if(!diags.length) break;
+    let fixedThisRound = 0;
+    for(const d of diags){
+      const before = editor.value;
+      const after = applyFix(editor.value, d);
+      if(after !== before){
+        editor.value = after;
+        fixedThisRound++;
+        totalFixed++;
+      }
+    }
+    if(fixedThisRound === 0) break;
+  }
+
+  if(editor.value !== original){
+    handleInput(true);
+    const fresh = analyzeAll(editor.value);
+    updateAIBadge(fresh);
+    renderAIPanel(fresh);
+    toast('✨ ' + totalFixed + ' مورد اصلاح شد');
+  }else{
+    toast('موردی برای اصلاح یافت نشد');
+  }
+}
+
+/* =========================================================
+   تنظیمات (Settings)
+   ========================================================= */
+function makeSwitchRow(label, sub, checked, onChange){
+  const row = document.createElement('div');
+  row.className = 'set-row';
+  const left = document.createElement('div');
+  const l = document.createElement('div');
+  l.className = 'set-label';
+  l.textContent = label;
+  const s = document.createElement('div');
+  s.className = 'set-sub';
+  s.textContent = sub;
+  left.appendChild(l); left.appendChild(s);
+  const sw = document.createElement('label');
+  sw.className = 'switch';
+  const inp = document.createElement('input');
+  inp.type = 'checkbox';
+  inp.checked = !!checked;
+  const sl = document.createElement('span');
+  sl.className = 'slider';
+  sw.appendChild(inp); sw.appendChild(sl);
+  inp.addEventListener('change', () => onChange(inp.checked));
+  row.appendChild(left); row.appendChild(sw);
+  return row;
+}
+
+function openSettings(){
+  showModal(close => {
+    const wrap = document.createElement('div');
+
+    const h = document.createElement('h3');
+    h.className = 'modal-title';
+    h.textContent = 'تنظیمات';
+
+    // اندازه فونت
+    const r1 = document.createElement('div');
+    r1.className = 'set-row';
+    const l1 = document.createElement('div');
+    l1.innerHTML = '<div class="set-label">اندازه فونت</div><div class="set-sub">اندازه متن ویرایشگر</div>';
+    const st = document.createElement('div');
+    st.className = 'stepper';
+    const minus = document.createElement('button');
+    minus.textContent = '−';
+    const val = document.createElement('span');
+    val.className = 'val';
+    val.textContent = state.fontSize;
+    const plus = document.createElement('button');
+    plus.textContent = '+';
+    minus.addEventListener('click', () => {
+      state.fontSize = Math.max(10, state.fontSize - 1);
+      val.textContent = state.fontSize;
+      applyPrefs(); savePrefs();
+    });
+    plus.addEventListener('click', () => {
+      state.fontSize = Math.min(24, state.fontSize + 1);
+      val.textContent = state.fontSize;
+      applyPrefs(); savePrefs();
+    });
+    st.appendChild(minus); st.appendChild(val); st.appendChild(plus);
+    r1.appendChild(l1); r1.appendChild(st);
+
+    // شکستن خطوط
+    const r2 = makeSwitchRow('شکستن خطوط', 'نمایش خطوط طولانی در چند سطر', state.wrap, v => {
+      state.wrap = v; applyPrefs(); savePrefs();
+    });
+
+    // شماره خطوط
+    const r3 = makeSwitchRow('شماره خطوط', 'نمایش شماره در کنار هر خط', state.lineNumbers, v => {
+      state.lineNumbers = v; applyPrefs(); savePrefs();
+    });
+
+    // ذخیره خودکار
+    const r4 = makeSwitchRow('ذخیره خودکار', 'ذخیره تغییرات به‌صورت خودکار', state.autoSave, v => {
+      state.autoSave = v; savePrefs();
+      if(v) scheduleAutoSave();
+    });
+
+    // تم
+    const themeRow = document.createElement('div');
+    themeRow.style.padding = '14px 2px 6px';
+    const themeLabel = document.createElement('div');
+    themeLabel.className = 'set-label';
+    themeLabel.textContent = 'تم رنگی';
+    const themeGrid = document.createElement('div');
+    themeGrid.className = 'theme-grid';
+
+    THEMES.forEach(t => {
+      const sw = document.createElement('div');
+      sw.className = 'theme-swatch' + (t.id === state.theme ? ' selected' : '');
+      sw.title = t.name;
+      const bg = document.createElement('div');
+      bg.className = 'sw-bg';
+      bg.style.background = t.bg;
+      for(let i = 0; i < 3; i++){
+        const bar = document.createElement('div');
+        bar.className = 'sw-bar' + (i === 2 ? ' short' : '');
+        bar.style.background = t.bar;
+        if(i === 1) bar.style.opacity = '.55';
+        if(i === 2) bar.style.opacity = '.3';
+        bg.appendChild(bar);
+      }
+      const nm = document.createElement('span');
+      nm.className = 'sw-name';
+      nm.textContent = t.name;
+      sw.appendChild(bg);
+      sw.appendChild(nm);
+      sw.addEventListener('click', () => {
+        setTheme(t.id);
+        themeGrid.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('selected'));
+        sw.classList.add('selected');
+        toast('🎨 تم: ' + t.name);
+      });
+      themeGrid.appendChild(sw);
+    });
+    themeRow.appendChild(themeLabel);
+    themeRow.appendChild(themeGrid);
+
+    // دکمه بستن
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions';
+    const ok = document.createElement('button');
+    ok.className = 'btn primary wide';
+    ok.textContent = 'بستن';
+    ok.addEventListener('click', () => close(true));
+    actions.appendChild(ok);
+
+    wrap.appendChild(h);
+    wrap.appendChild(r1);
+    wrap.appendChild(r2);
+    wrap.appendChild(r3);
+    wrap.appendChild(r4);
+    wrap.appendChild(themeRow);
+    wrap.appendChild(actions);
+    return wrap;
+  });
+}
+
+/* =========================================================
+   شیت‌ها
+   ========================================================= */
+function openFileSheet(id){
+  const f = state.files.find(x => x.id === id);
+  if(!f) return;
+  openSheet(f.name, [
+    { icon:'📂', label:'باز کردن', onClick: async () => { await openFile(id); closeDrawer(); } },
+    { icon:'✏️', label:'تغییر نام', onClick: () => renameFile(id) },
+    { icon:'⧉',  label:'ایجاد کپی', onClick: () => duplicateFile(id) },
+    { icon:'⬇️', label:'دانلود فایل', onClick: () => {
+      const content = (id === state.currentId) ? editor.value : f.content;
+      downloadBlob(f.name, content);
+      toast('⬇ در حال دانلود...');
+    }},
+    { icon:'🗑', label:'حذف فایل', danger:true, onClick: () => deleteFile(id) }
+  ]);
+}
+
+function openMainSheet(){
+  openSheet('گزینه‌ها', [
+    { icon:'🤖', label:'تحلیل هوشمند و اصلاح خودکار', onClick: openAIPanel },
+    { icon:'📄', label:'فایل جدید', onClick: newFile },
+    { icon:'📥', label:'وارد کردن فایل از دستگاه', onClick: importFiles },
+    { icon:'💾', label:'ذخیره', onClick: () => saveCurrent(true) },
+    { icon:'📝', label:'ذخیره با نام جدید', onClick: saveAsFile },
+    { icon:'⬇️', label:'دانلود فایل فعلی', onClick: downloadCurrent },
+    { icon:'📋', label:'کپی کد در حافظه', onClick: copyCode },
+    { icon:'🔗', label:'اشتراک‌گذاری', onClick: shareCurrent },
+    { icon:'🗄', label:'پشتیبان‌گیری از همه فایل‌ها', onClick: backupAll },
+    { icon:'♻️', label:'بازیابی از پشتیبان', onClick: restoreBackup },
+    { icon:'🔍', label:'جست‌وجو و جایگزینی', onClick: openFindReplace },
+    { icon:'⚙️', label:'تنظیمات', onClick: openSettings }
+  ]);
+}
+
+/* =========================================================
+   رویدادها
+   ========================================================= */
+function bindEvents(){
+
+  // --- ویرایشگر ---
+  editor.addEventListener('beforeinput', e => {
+    if(e.inputType && e.inputType.startsWith('history')) return;
+    pushUndoSnapshot();
+  });
+  editor.addEventListener('input', () => handleInput());
+  editor.addEventListener('paste', () => pushUndoSnapshot(true));
+  editor.addEventListener('cut', () => pushUndoSnapshot(true));
+  editor.addEventListener('drop', () => pushUndoSnapshot(true));
+  editor.addEventListener('scroll', () => { gutter.scrollTop = editor.scrollTop; });
+  editor.addEventListener('keyup', updateStatus);
+  editor.addEventListener('click', updateStatus);
+  editor.addEventListener('select', updateStatus);
+  editor.addEventListener('focus', updateStatus);
+
+  editor.addEventListener('keydown', e => {
+    if(e.key === 'Tab'){
+      e.preventDefault();
+      insertPlain('  ');
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')){
+      e.preventDefault();
+      saveCurrent(true);
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')){
+      e.preventDefault();
+      openFindReplace();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')){
+      e.preventDefault();
+      if(e.shiftKey) doRedo(); else doUndo();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')){
+      e.preventDefault();
+      doRedo();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+      e.preventDefault();
+      openPreview();
+    }
+  });
+
+  // --- نوار بالا ---
+  $('btnDrawer').addEventListener('click', openDrawer);
+  $('btnDrawerClose').addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+
+  $('btnSave').addEventListener('click', () => saveCurrent(true));
+  $('btnRun').addEventListener('click', openPreview);
+  $('btnMore').addEventListener('click', openMainSheet);
+  $('btnAI').addEventListener('click', openAIPanel);
+
+  btnUndo.addEventListener('click', doUndo);
+  btnRedo.addEventListener('click', doRedo);
+
+  // --- دراور ---
+  $('btnNewFile').addEventListener('click', newFile);
+  $('btnImport').addEventListener('click', importFiles);
+
+  // --- شیت ---
+  sheetBackdrop.addEventListener('click', closeSheet);
+
+  // --- AI Panel ---
+  aiBackdrop.addEventListener('click', closeAIPanel);
+  aiFixAllBtn.addEventListener('click', aiFixAll);
+
+  // --- پیش‌نمایش ---
+  $('btnPreviewClose').addEventListener('click', closePreview);
+  $('btnPreviewReload').addEventListener('click', reloadPreview);
+
+  // --- نوار درج سریع ---
+  $('tagbar').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-tag]');
+    if(!btn) return;
+    const tag = btn.getAttribute('data-tag');
+    switch(tag){
+      case 'div':    insertSnippet('<div>', '</div>', ''); break;
+      case 'p':      insertSnippet('<p>', '</p>', ''); break;
+      case 'h1':     insertSnippet('<h1>', '</h1>', ''); break;
+      case 'a':      insertSnippet('<a href="">', '</a>', 'متن لینک'); break;
+      case 'img':    insertSnippet('<img src="" alt="', '">', 'توضیح تصویر'); break;
+      case 'br':     insertPlain('<br>'); break;
+      case 'strong': insertSnippet('<strong>', '</strong>', ''); break;
+      case 'ul':     insertSnippet('<ul>\n  <li>', '</li>\n</ul>', ''); break;
+      case 'li':     insertSnippet('<li>', '</li>', ''); break;
+      case 'table':
+        insertSnippet(
+          '<table border="1">\n  <tr>\n    <th>',
+          '</th>\n    <th>ستون ۲</th>\n  </tr>\n  <tr>\n    <td>داده ۱</td>\n    <td>داده ۲</td>\n  </tr>\n</table>',
+          'ستون ۱'
+        );
+        break;
+      case 'style':   insertSnippet('<style>\n', '\n</style>', 'body { }'); break;
+      case 'script':  insertSnippet('<script>\n', '\n<\/script>', 'console.log("hi");'); break;
+      case 'comment': insertSnippet('<!-- ', ' -->', 'توضیح'); break;
+      case 'nbsp':    insertPlain('&nbsp;'); break;
+      case 'find':    openFindReplace(); break;
+      case 'format':  formatCode(); break;
+      case 'ai':      openAIPanel(); break;
+    }
+  });
+
+  // --- ذخیره هنگام مخفی شدن ---
+  document.addEventListener('visibilitychange', () => { if(document.hidden) flushSave(); });
+  window.addEventListener('pagehide', () => { flushSave(); });
+  window.addEventListener('blur', () => { flushSave(); });
+
+  // --- دکمه بازگشت اندروید (Escape) ---
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Escape') return;
+    if(previewOverlay.classList.contains('open')) closePreview();
+    else if(modalBackdrop.classList.contains('show')){
+      modalBackdrop.classList.remove('show');
+      modalBox.innerHTML = '';
+    }
+    else if(aiPanel.classList.contains('open')) closeAIPanel();
+    else if(sheet.classList.contains('open')) closeSheet();
+    else if(drawer.classList.contains('open')) closeDrawer();
+  });
+}
+
+/* =========================================================
+   راه‌اندازی
+   ========================================================= */
+async function init(){
+  loadPrefs();
+  applyPrefs();
+  bindEvents();
+
+  try{
+    const files = await dbGetAll();
+    state.files = files.filter(f => f && f.id && typeof f.content === 'string');
+  }catch(e){ state.files = []; }
+
+  if(!state.files.length){
+    const f = createFileObject('index.html', TEMPLATE('صفحه من'));
+    state.files.push(f);
+    await dbPut(f);
+  }
+
+  let last = null;
+  try{ last = localStorage.getItem(LAST_KEY); }catch(e){}
+  const start = state.files.find(f => f.id === last) ||
+                state.files.slice().sort((a,b) => b.updated - a.updated)[0];
+
+  if(start){
+    state.currentId = start.id;
+    editor.value = start.content;
+    state.dirty = false;
+    try{ localStorage.setItem(LAST_KEY, start.id); }catch(e){}
+  }
+
+  updateTitle();
+  updateGutter();
+  updateStatus();
+  renderFileList();
+  updateUndoButtons();
+
+  editor.scrollTop = 0;
+  gutter.scrollTop = 0;
+
+  setTimeout(() => scheduleAnalysis(500), 500);
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+}else{
+  init();
+}
+
+})();
+</script>
+</body>
+</html>
