@@ -1,0 +1,27 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}:format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+    _class = "Material"
+    m_ShaderName = "csgo_complex.vfx"
+    m_TextureParams = [
+        {
+            m_nTextureId = 0
+            m_Name = "g_tColor"
+            m_pTexture = "materials/longsword_color.vtex"
+        },
+        {
+            m_nTextureId = 1
+            m_Name = "g_tNormal"
+            m_pTexture = "materials/longsword_normal.vtex"
+        }
+    ]
+    m_FloatParams = [
+        {
+            m_Name = "g_flMetalness"
+            m_flValue = 0.0
+        },
+        {
+            m_Name = "g_flRoughness"
+            m_flValue = 0.5
+        }
+    ]
+}
