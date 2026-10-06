@@ -1,0 +1,27 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d}:format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+    _class = "Model"
+    m_MaterialGroups = [
+        {
+            m_Name = "default"
+            m_Materials = [
+                "materials/longsword.vmat"
+            ]
+        }
+    ]
+    m_MeshGroup = {
+        m_Name = "longsword"
+        m_Meshes = [
+            {
+                m_Name = "longsword_mesh"
+                m_File = "models/longsword.vmesh"
+            }
+        ]
+    }
+    m_ModelInfo = {
+        m_Mass = 100.0
+        m_DefaultAnim = ""
+    }
+    m_SequenceName = ""
+    m_AnimGraphName = ""
+}
